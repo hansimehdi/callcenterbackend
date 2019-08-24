@@ -13,7 +13,7 @@ exports.connectToDb = function (callback) {
         return;
     }
     // Establish the DB connection
-    mongoose.connect("mongodb://" + process.env.MONGO_HOST + "/admin", { user: "admin", pass: "admin" });
+    mongoose.connect("mongodb://" + process.env.MONGO_HOST + "/admin", { user: "admin", pass: "admin", useNewUrlParser: true });
     // Event for successfully connecting database
     mongoose.connection.on("connected", function () {
         console.log('connected')
@@ -43,6 +43,19 @@ exports.createUser = function (userEntity, callback) {
         callback(err, success);
     });
 };
+
+exports.deleteUser = function (id, callback) {
+    User.remove({ "id": id }, function (err) {
+        callback(err);
+    });
+}
+
+exports.updateUser = function (user, callback) {
+    User.updateOne({ 'id': user.id }, user, function (err, success) {
+        console.log(err);
+        callback(err, success);
+    });
+}
 
 exports.getAllUsers = function (callback) {
     User.find({}, function (err, success) {

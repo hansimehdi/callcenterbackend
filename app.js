@@ -9,6 +9,7 @@ var indexRouter = require('./routes/index');
 const bodyParser = require('body-parser');
 const responseRender = require('./middlewares/responseRender');
 const cors = require('cors');
+const serverErrors = require('./constant/errors');
 
 
 var app = express();
@@ -30,12 +31,12 @@ app.use('/', indexRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
-  next(createError(404));
+  res.status(400).json(responseRender({}, serverErrors.ROUTE_NOT_FOUND, ""));
 });
 
 // error handler
 app.use(function (err, req, res, next) {
-  res.status(500).json(responseRender(err, String(err), ""))
+  res.status(500).json(responseRender({}, serverErrors.SERVER_ERROR, ""))
 });
 
 module.exports = app;
