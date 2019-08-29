@@ -5,6 +5,7 @@ var uuid = require('uuid/v4');
 var serverErrors = require('../constant/errors');
 var serverMessages = require('../constant/messages');
 var Joi = require('@hapi/joi');
+var crypt = require('bcrypt');
 
 module.exports = {
     addUser: (rq, rs, nx) => {
@@ -25,18 +26,26 @@ module.exports = {
 
         if (error) { return rs.status(200).json(responseRender({}, serverErrors.INVALID_DATA, "")) }
 
-        userEntity = rq.body;
-        userEntity.id = uuid();
-        userEntity.isActive = false;
-        userEntity.createdAt = userEntity.updatedAt = new Date();
-        dbConnect.connectToDb();
-        dbConnect.createUser(userEntity, function (err, user) {
-            dbConnect.disconnect();
+        crypt.hash(rq.body.password, 11, (err, data) => {
             if (err) {
-                rs.status(400).json(responseRender({}, serverErrors.SERVER_ERROR, ""));
-            }
-            if (user) {
-                rs.status(200).json(responseRender(user, "", serverMessages.ACCOUNT_CREATED));
+                return rs.status(500).json(responseRender({}, serverErrors.SERVER_ERROR, ""));
+            } else {
+                userEntity = rq.body;
+                userEntity.password = data;
+                userEntity.id = uuid();
+                userEntity.isActive = false;
+                userEntity.createdAt = userEntity.updatedAt = new Date();
+                dbConnect.connectToDb();
+                dbConnect.createUser(userEntity, function (err, user) {
+                    dbConnect.disconnect();
+                    if (err) {
+                        rs.status(400).json(responseRender({}, serverErrors.SERVER_ERROR, ""));
+                    }
+                    if (user) {
+                        user.password = null;
+                        rs.status(200).json(responseRender(user, "", serverMessages.ACCOUNT_CREATED));
+                    }
+                });
             }
         });
     },
@@ -49,10 +58,12 @@ module.exports = {
                 rs.status(400).json(responseRender({}, serverErrors.SERVER_ERROR, ""));
             }
             if (user) {
-                if (user == "") {
+                if (user.length == 0) {
                     return rs.status(200).json(responseRender({}, serverErrors.ACCOUNT_NOT_FOUND, ""))
+                } else {
+                    user[0].password = null;
+                    rs.status(200).json(responseRender(user[0], "", serverMessages.OK));
                 }
-                rs.status(200).json(responseRender(user, "", serverMessages.OK));
             }
         })
     },
@@ -62,10 +73,12 @@ module.exports = {
         dbConnect.connectToDb();
         dbConnect.deleteUser(rq.params.id, function (err) {
             dbConnect.disconnect();
-            if (err) { return rs.status(500).json(responseRender({}, serverErrors.ACCOUNT_NOT_FOUND, "")) }
+            if (err) {
+                return rs.status(500).json(responseRender({}, serverErrors.SERVER_ERROR, ""))
+            } else {
+                return rs.status(200).json(responseRender({}, "", serverMessages.OK))
+            }
         });
-        dbConnect.disconnect();
-        return rs.status(200).json(responseRender({}, "", serverMessages.OK))
     },
 
     update: (rq, rs, nx) => {
@@ -83,7 +96,6 @@ module.exports = {
         });
 
         const { error, value } = Joi.validate(rq.body, schema);
-        console.log(error)
 
         if (error) { return rs.status(200).json(responseRender({}, serverErrors.INVALID_DATA, "")); }
 
@@ -115,6 +127,9 @@ module.exports = {
                 rs.status(500).json(responseRender(err, 'server errror', ''));
             }
             if (success) {
+                success.forEach(element => {
+                    element.password = null;
+                });
                 rs.status(200).json(responseRender(success, '', ''));
             }
         });

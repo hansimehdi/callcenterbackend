@@ -3,6 +3,7 @@ const mongoose = require("mongoose"),
 
 // create a schema for Dish
 let AdminSchema = new Schema({
+    id: String,
     username: String,
     lastname: String,
     address: String,
