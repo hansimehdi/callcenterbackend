@@ -71,7 +71,7 @@ exports.deleteAdmin = function (id, callback) {
 }
 
 exports.updateUser = function (user, callback) {
-    User.updateOne({ 'id': user.id }, user, function (err, success) {
+    User.update({ 'id': user.id }, user, function (err, success) {
         console.log(err);
         callback(err, success);
     });

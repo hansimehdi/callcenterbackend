@@ -87,12 +87,8 @@ module.exports = {
             username: Joi.string().required().max(30).min(3).regex(/^[a-zA-Z_ ]+$/),
             lastname: Joi.string().required().min(3).max(30).regex(/^[a-zA-Z_ ]+$/),
             address: Joi.string().required().min(3).max(30),
-            isActive: Joi.boolean().optional(),
             phone: Joi.string().optional().min(6).max(15),
             email: Joi.string().email({ minDomainSegments: 2 }).required().max(50),
-            password: Joi.string().min(8).max(30).required(),
-            createdAt: Joi.string().optional(),
-            updatedAt: Joi.string().optional()
         });
 
         const { error, value } = Joi.validate(rq.body, schema);
@@ -105,20 +101,32 @@ module.exports = {
         userEntity.email = rq.body.email;
         userEntity.lastname = rq.body.lastname;
         userEntity.username = rq.body.username;
-        userEntity.password = rq.body.password;
-        userEntity.createdAt = rq.body.createdAt;
+        userEntity.phone = rq.body.phone;
         userEntity.updatedAt = new Date();
-        userEntity.isActive = rq.body.isActive
-        dbConnect.updateUser(userEntity, function (err, user) {
-            dbConnect.disconnect();
+        dbConnect.getUser(userEntity.id, (err, usr) => {
             if (err) { return rs.status(500).json(responseRender({}, serverErrors.SERVER_ERROR, "")) }
-            if (user && user != "") {
-                return rs.status(200).json(responseRender(user, "", serverMessages.OK))
+            else if (usr && usr.length > 0) {
+                usr[0].address = userEntity.address;
+                usr[0].email = userEntity.email;
+                usr[0].lastname = userEntity.lastname;
+                usr[0].username = userEntity.username;
+                usr[0].phone = userEntity.phone;
+                usr[0].updatedAt = userEntity.updatedAt;
+                dbConnect.updateUser(usr[0], function (err, user) {
+                    dbConnect.disconnect();
+                    if (err) { return rs.status(500).json(responseRender({}, serverErrors.SERVER_ERROR, "")) }
+                    if (user && user != "") {
+                        return rs.status(200).json(responseRender(user, "", serverMessages.OK))
+                    } else {
+                        return rs.status(404).json(responseRender({}, serverErrors.ACCOUNT_NOT_FOUND, ""))
+                    }
+                });
             } else {
                 return rs.status(404).json(responseRender({}, serverErrors.ACCOUNT_NOT_FOUND, ""))
             }
         });
     },
+    
     list: (rq, rs, nx) => {
         dbConnect.connectToDb();
         dbConnect.getAllUsers(function (err, success) {

@@ -95,12 +95,8 @@ module.exports = {
             username: Joi.string().required().max(30).min(3).regex(/^[a-zA-Z_ ]+$/),
             lastname: Joi.string().required().min(3).max(30).regex(/^[a-zA-Z_ ]+$/),
             address: Joi.string().required().min(3).max(30),
-            isActive: Joi.boolean().optional(),
             phone: Joi.string().optional().min(6).max(15),
             email: Joi.string().email({ minDomainSegments: 2 }).required().max(50),
-            password: Joi.string().min(8).max(30).required(),
-            createdAt: Joi.string().optional(),
-            updatedAt: Joi.string().optional()
         });
 
         const { error, value } = Joi.validate(rq.body, schema);
@@ -113,15 +109,26 @@ module.exports = {
         adminEntity.email = rq.body.email;
         adminEntity.lastname = rq.body.lastname;
         adminEntity.username = rq.body.username;
-        adminEntity.password = rq.body.password;
-        adminEntity.createdAt = rq.body.createdAt;
+        adminEntity.phone = rq.body.phone;
         adminEntity.updatedAt = new Date();
-        adminEntity.isActive = rq.body.isActive
-        dbConnect.updateAdmin(adminEntity, function (err, admin) {
-            dbConnect.disconnect();
+        dbConnect.GetAdmin(adminEntity.id, (err, usr) => {
             if (err) { return rs.status(500).json(responseRender({}, serverErrors.SERVER_ERROR, "")) }
-            if (admin != null && admin != "") {
-                return rs.status(200).json(responseRender(admin, "", serverMessages.OK))
+            else if (usr && usr.length > 0) {
+                usr[0].address = adminEntity.address;
+                usr[0].email = adminEntity.email;
+                usr[0].lastname = adminEntity.lastname;
+                usr[0].username = adminEntity.username;
+                usr[0].phone = adminEntity.phone;
+                usr[0].updatedAt = adminEntity.updatedAt;
+                dbConnect.updateAdmin(usr[0], function (err, user) {
+                    dbConnect.disconnect();
+                    if (err) { return rs.status(500).json(responseRender({}, serverErrors.SERVER_ERROR, "")) }
+                    if (user && user != "") {
+                        return rs.status(200).json(responseRender(user, "", serverMessages.OK))
+                    } else {
+                        return rs.status(404).json(responseRender({}, serverErrors.ACCOUNT_NOT_FOUND, ""))
+                    }
+                });
             } else {
                 return rs.status(404).json(responseRender({}, serverErrors.ACCOUNT_NOT_FOUND, ""))
             }
