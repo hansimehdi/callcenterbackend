@@ -2,7 +2,8 @@
 
 var mongoose = require("mongoose"),
     Admin = require("../models/admin"),
-    User = require("../models/users");
+    User = require("../models/users"),
+    Plug = require("../models/plug");
 
 // Function to establish connection for the Database
 exports.connectToDb = function (callback) {
@@ -72,14 +73,12 @@ exports.deleteAdmin = function (id, callback) {
 
 exports.updateUser = function (user, callback) {
     User.update({ 'id': user.id }, user, function (err, success) {
-        console.log(err);
         callback(err, success);
     });
 }
 
 exports.updateAdmin = function (admin, callback) {
     Admin.updateOne({ 'id': admin.id }, admin, function (err, admin) {
-        console.log(err);
         callback(err, admin);
     });
 }
@@ -94,4 +93,46 @@ exports.getAllAdmins = function (callback) {
     Admin.find({}, function (err, adminList) {
         callback(err, adminList);
     });
+}
+
+exports.AddPlug = function (plug, callback) {
+    Plug.create(plug, (err, p) => {
+        callback(err, p);
+    });
+}
+
+exports.UpdatePlug = (id, plug, callback) => {
+    Plug.updateOne({ id: id }, plug, (err, success) => {
+        callback(err, success)
+    })
+}
+
+exports.DeletePlug = (id, callback) => {
+    Plug.deleteOne({ id: id }, (err) => {
+        callback(err);
+    });
+}
+
+exports.GetPlug = (id, callback) => {
+    Plug.findOne({ id: id }, (err, plug) => {
+        callback(err, plug);
+    });
+}
+
+exports.getAllPlugs = (callback) => {
+    Plug.find({}, (err, plugs) => {
+        callback(err, plugs)
+    })
+}
+
+exports.getUserByEmail = (email, callback) => {
+    User.findOne({ email: email }, (err, user) => {
+        callback(err, user)
+    })
+}
+
+exports.getAdminByEmail = (email, callback) => {
+    Admin.findOne({ email: email }, (err, admin) => {
+        callback(err, admin)
+    })
 }

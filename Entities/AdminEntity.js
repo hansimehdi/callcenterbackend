@@ -7,6 +7,7 @@ module.exports = {
     password: String,
     phone: String,
     isActive: Boolean,
+    role: String,
     createdAt: Date,
     updatedAt: Date
 }

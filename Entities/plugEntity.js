@@ -1,0 +1,21 @@
+module.exports = {
+    id: "",
+    firstname: "",
+    lastname: "",
+    address: "",
+    email: "",
+    phone: "",
+    mobile: "",
+    zipCode: "",
+    city: "",
+    situation: "",
+    numberOfChild: "",
+    activity: "",
+    age: "",
+    guarentee: "",
+    mutual: "",
+    bank: "",
+    availability: "",
+    createdAt: new Date(),
+    updatedAt: new Date()
+}

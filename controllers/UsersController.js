@@ -126,19 +126,19 @@ module.exports = {
             }
         });
     },
-    
+
     list: (rq, rs, nx) => {
         dbConnect.connectToDb();
         dbConnect.getAllUsers(function (err, success) {
             dbConnect.disconnect();
             if (err) {
-                rs.status(500).json(responseRender(err, 'server errror', ''));
+                rs.status(500).json(responseRender(err, serverErrors.SERVER_ERROR, ''));
             }
             if (success) {
                 success.forEach(element => {
                     element.password = null;
                 });
-                rs.status(200).json(responseRender(success, '', ''));
+                rs.status(200).json(responseRender(success, '', serverMessages.OK));
             }
         });
     }

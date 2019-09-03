@@ -7,6 +7,8 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var userRouter = require('./routes/users');
 var adminRouter = require('./routes/admin');
+var plugRouter = require('./routes/plugs');
+var securityRouter = require('./routes/security');
 const bodyParser = require('body-parser');
 const responseRender = require('./middlewares/responseRender');
 const cors = require('cors');
@@ -31,6 +33,8 @@ app.use(cors(corsOptions));
 app.use('/', indexRouter);
 app.use('/', userRouter);
 app.use('/', adminRouter);
+app.use('/', plugRouter);
+app.use('/', securityRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

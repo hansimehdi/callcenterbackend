@@ -35,6 +35,7 @@ module.exports = {
                 adminEntity.password = data;
                 adminEntity.id = uuid();
                 adminEntity.isActive = false;
+                adminEntity.role = "ADMIN";
                 adminEntity.createdAt = adminEntity.updatedAt = new Date();
                 dbConnect.connectToDb();
                 dbConnect.createAdmin(adminEntity, function (err, admin) {
@@ -74,19 +75,15 @@ module.exports = {
 
     deleteAdmin: (rq, rs, nx) => {
         if (typeof (rq.params.id) == "undefined") { return rs.status(200).json(responseRender({}, serverErrors.INVALID_DATA, "")) }
-        try {
-            dbConnect.connectToDb();
-            dbConnect.deleteAdmin(rq.params.id, function (err) {
-                dbConnect.disconnect();
-                if (err) {
-                    return rs.status(500).json(responseRender({}, serverErrors.SERVER_ERROR, ""))
-                } else {
-                    return rs.status(200).json(responseRender({}, "", serverMessages.OK))
-                }
-            });
-        } catch (e) {
-            return rs.status(500).json(responseRender({}, serverErrors.SERVER_ERROR, ""))
-        }
+        dbConnect.connectToDb();
+        dbConnect.deleteAdmin(rq.params.id, function (err) {
+            dbConnect.disconnect();
+            if (err) {
+                return rs.status(500).json(responseRender({}, serverErrors.SERVER_ERROR, ""))
+            } else {
+                return rs.status(200).json(responseRender({}, "", serverMessages.OK))
+            }
+        });
     },
 
     update: (rq, rs, nx) => {
@@ -139,13 +136,13 @@ module.exports = {
         dbConnect.getAllAdmins(function (err, success) {
             dbConnect.disconnect();
             if (err) {
-                rs.status(500).json(responseRender(err, 'server errror', ''));
+                rs.status(500).json(responseRender(err, serverErrors.SERVER_ERROR, ''));
             }
             if (success) {
                 success.forEach(element => {
                     element.password = null;
                 });
-                rs.status(200).json(responseRender(success, '', ''));
+                rs.status(200).json(responseRender(success, '', serverMessages.OK));
             }
         });
     }
