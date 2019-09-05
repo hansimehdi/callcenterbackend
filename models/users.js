@@ -10,6 +10,7 @@ let UserSchema = new Schema({
     email: String,
     password: String,
     phone: String,
+    adminId: String,
     isActive: Boolean,
     createdAt: Date,
     updatedAt: Date

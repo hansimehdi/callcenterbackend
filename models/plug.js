@@ -21,6 +21,7 @@ let PlugSchema = new Schema({
     bank: String,
     availability: Boolean,
     role: String,
+    userId: String,
     createdAt: Date,
     updatedAt: Date
 });

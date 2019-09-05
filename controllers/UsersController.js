@@ -6,9 +6,12 @@ var serverErrors = require('../constant/errors');
 var serverMessages = require('../constant/messages');
 var Joi = require('@hapi/joi');
 var crypt = require('bcrypt');
+var decoder = require('../helpers/AuthorizationDecode');
 
 module.exports = {
     addUser: (rq, rs, nx) => {
+        let token = rq.headers.authorization.split(" ")[1];
+
         const schema = Joi.object().keys({
             id: Joi.string().allow(''),
             username: Joi.string().required().max(30).min(3).regex(/^[a-zA-Z_ ]+$/),
@@ -34,6 +37,7 @@ module.exports = {
                 userEntity.password = data;
                 userEntity.id = uuid();
                 userEntity.isActive = false;
+                userEntity.adminId = decoder.getSubject(token);
                 userEntity.createdAt = userEntity.updatedAt = new Date();
                 dbConnect.connectToDb();
                 dbConnect.createUser(userEntity, function (err, user) {
@@ -69,8 +73,15 @@ module.exports = {
     },
 
     deleteUser: (rq, rs, nx) => {
+        let token = rq.headers.authorization.split(" ")[1];
         if (typeof (rq.params.id) == "undefined") { return rs.status(200).json(responseRender({}, serverErrors.INVALID_DATA, "")) }
         dbConnect.connectToDb();
+        dbConnect.deleteUserPlugs(decoder.getSubject(token), (err) => {
+            if (err) {
+                dbConnect.disconnect();
+                return rs.status(500).json(responseRender({}, serverErrors.SERVER_ERROR, ""))
+            }
+        })
         dbConnect.deleteUser(rq.params.id, function (err) {
             dbConnect.disconnect();
             if (err) {
@@ -128,8 +139,9 @@ module.exports = {
     },
 
     list: (rq, rs, nx) => {
+        let token = rq.headers.authorization.split(" ")[1];
         dbConnect.connectToDb();
-        dbConnect.getAllUsers(function (err, success) {
+        dbConnect.getAllUsers(decoder.getSubject(token), function (err, success) {
             dbConnect.disconnect();
             if (err) {
                 rs.status(500).json(responseRender(err, serverErrors.SERVER_ERROR, ''));

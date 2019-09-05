@@ -9,16 +9,18 @@ router.post('/plug', authorize.AuthorizationCheck, policy.isUser, plugController
 
 router.delete('/plug/:id', authorize.AuthorizationCheck,
     (rq, rs, nx) => {
-        policyControl.grantRoles(rq, rs, nx, ["ADMIN", "USER"]);
+        policy.grantRoles(rq, rs, nx, ["ADMIN", "USER"]);
     }, plugController.deletePlug)
 
 router.get('/plug/:id', authorize.AuthorizationCheck, (rq, rs, nx) => {
-    policyControl.grantRoles(rq, rs, nx, ["ADMIN", "USER"]);
+    policy.grantRoles(rq, rs, nx, ["ADMIN", "USER"]);
 }, plugController.getPlug)
 
 router.get('/plugs', authorize.AuthorizationCheck, (rq, rs, nx) => {
-    policyControl.grantRoles(rq, rs, nx, ["ADMIN", "USER"]);
+    policy.grantRoles(rq, rs, nx, ["ADMIN", "USER"]);
 }, plugController.list)
+
+router.get('/plugs/admin', authorize.AuthorizationCheck, policy.isAdmin, plugController.listAdminPlugs);
 
 router.put('/plug', authorize.AuthorizationCheck, policy.isUser, plugController.update)
 

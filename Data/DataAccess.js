@@ -83,8 +83,8 @@ exports.updateAdmin = function (admin, callback) {
     });
 }
 
-exports.getAllUsers = function (callback) {
-    User.find({}, function (err, success) {
+exports.getAllUsers = function (id, callback) {
+    User.find({ adminId: id }, function (err, success) {
         callback(err, success);
     });
 }
@@ -119,8 +119,8 @@ exports.GetPlug = (id, callback) => {
     });
 }
 
-exports.getAllPlugs = (callback) => {
-    Plug.find({}, (err, plugs) => {
+exports.getAllPlugs = (id, callback) => {
+    Plug.find({ userId: id }, (err, plugs) => {
         callback(err, plugs)
     })
 }
@@ -134,5 +134,23 @@ exports.getUserByEmail = (email, callback) => {
 exports.getAdminByEmail = (email, callback) => {
     Admin.findOne({ email: email }, (err, admin) => {
         callback(err, admin)
+    })
+}
+
+exports.getUserPlugs = (id, callback) => {
+    Plug.find({ userId: id }, (err, plugs) => {
+        callback(err, plugs);
+    })
+}
+
+exports.deleteUserPlugs = (id, callback) => {
+    Plug.remove({ userId: id }, (err) => {
+        callback(err);
+    })
+}
+
+exports.getAdminPlugs = (filter, callback) => {
+    Plug.find({ '$or': filter }, (err, success) => {
+        callback(err, success)
     })
 }

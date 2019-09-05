@@ -10,6 +10,7 @@ module.exports = {
     city: "",
     situation: "",
     numberOfChild: "",
+    userId: "",
     activity: "",
     age: "",
     guarentee: "",

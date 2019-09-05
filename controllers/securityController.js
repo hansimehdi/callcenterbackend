@@ -56,6 +56,7 @@ module.exports = {
         })
     },
     adminLogin: (rq, rs, nx) => {
+        console.log(rq.body)
         const schema = Joi.object().keys({
             email: Joi.string().email({ minDomainSegments: 2 }).required().max(50),
             password: Joi.string().min(8).max(30).required(),
